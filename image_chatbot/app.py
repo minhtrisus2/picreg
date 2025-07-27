@@ -9,15 +9,16 @@ from urllib.request import urlopen
 
 @st.cache_resource
 def load_model():
-    """Tải mô hình AI bằng PyTorch và Timm (chỉ chạy một lần)."""
-    model = timm.create_model('mobilenetv3_large_100', pretrained=True)
+    """Tải mô hình AI. Chúng ta sẽ dùng ResNet18, một mô hình rất ổn định."""
+    # Thay đổi sang mô hình ResNet18
+    model = timm.create_model('resnet18', pretrained=True)
     model.eval()
     return model
 
 @st.cache_data
 def load_labels():
     """Tải danh sách nhãn từ file JSON.
-    Hàm này đã được sửa lỗi."""
+    Hàm này đã được sửa lỗi triệt để."""
     labels_url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
     return json.load(urlopen(labels_url))
 
