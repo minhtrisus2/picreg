@@ -16,7 +16,8 @@ def load_model():
 
 @st.cache_data
 def load_labels():
-    """Tải danh sách nhãn từ file JSON."""
+    """Tải danh sách nhãn từ file JSON.
+    Hàm này đã được sửa lỗi."""
     labels_url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
     return json.load(urlopen(labels_url))
 
