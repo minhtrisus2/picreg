@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Nhận Dạng Ảnh</title>
+    <style>
+        :root { --main-bg: #f0f2f5; --chat-bg: #ffffff; --user-msg-bg: #0084ff; --ai-msg-bg: #e4e6eb; --user-text: #ffffff; --ai-text: #050505; --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--main-bg); display: flex; height: 100vh; justify-content: center; align-items: center; }
+        .chat-window { width: 100%; max-width: 680px; height: 85vh; display: flex; flex-direction: column; background-color: var(--chat-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .chat-header { text-align: center; padding: 16px; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 1.1rem; color: var(--ai-text); }
+        .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { display: flex; max-width: 75%; }
+        .message-content { padding: 10px 15px; border-radius: 18px; line-height: 1.4; word-wrap: break-word; }
+        .user-message { margin-left: auto; }
+        .user-message .message-content { background-color: var(--user-msg-bg); color: var(--user-text); border-bottom-right-radius: 4px; }
+        .ai-message { margin-right: auto; }
+        .ai-message .message-content { background-color: var(--ai-msg-bg); color: var(--ai-text); border-bottom-left-radius: 4px; }
+        .message-content img { max-width: 200px; border-radius: 10px; display: block; }
+        .thinking { color: #65676b; font-style: italic; }
+        .chat-input-area { padding: 10px 20px; border-top: 1px solid #ddd; }
+        #upload-form { display: flex; align-items: center; justify-content: center; }
+        #file-input { display: none; }
+        .file-label { cursor: pointer; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-window">
+        <div class="chat-header">Bot Nhận Dạng Hình Ảnh</div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message ai-message">
+                <div class="message-content">Xin chào! Hãy gửi một bức ảnh để tôi phân tích.</div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <form id="upload-form">
+                <label for="file-input" class="file-label" title="Chọn ảnh để tải lên">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#0084ff"><path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v4h4v2h-4v4h-2v-4h-4v-2h4v-4z"/></svg>
+                </label>
+                <input type="file" id="file-input" name="file" accept="image/*">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        function appendMessage(html, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = html;
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return messageDiv;
+        }
+
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const userImageURL = URL.createObjectURL(file);
+            appendMessage(`<img src="${userImageURL}" alt="Ảnh đã tải lên">`, 'user-message');
+
+            const thinkingMessage = appendMessage('...', 'ai-message thinking');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/recognize_image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                thinkingMessage.remove();
+                if (data.error) {
+                    appendMessage(`Lỗi: ${data.error}`, 'ai-message');
+                } else {
+                    appendMessage(data.description, 'ai-message');
+                }
+            } catch (error) {
+                thinkingMessage.remove();
+                appendMessage('Rất tiếc, đã có lỗi kết nối đến máy chủ.', 'ai-message');
+            }
+            
+            event.target.value = null;
+        });
+    </script>
+</body>
+</html>
