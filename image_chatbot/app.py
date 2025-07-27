@@ -9,8 +9,7 @@ from urllib.request import urlopen
 
 @st.cache_resource
 def load_model():
-    """Tải mô hình AI. Chúng ta sẽ dùng ResNet18, một mô hình rất ổn định."""
-    # Thay đổi sang mô hình ResNet18
+    """Tải mô hình AI ResNet18."""
     model = timm.create_model('resnet18', pretrained=True)
     model.eval()
     return model
@@ -18,7 +17,7 @@ def load_model():
 @st.cache_data
 def load_labels():
     """Tải danh sách nhãn từ file JSON.
-    Hàm này đã được sửa lỗi triệt để."""
+    Hàm này đã được sửa lỗi."""
     labels_url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
     return json.load(urlopen(labels_url))
 
@@ -55,7 +54,6 @@ def recognize_image(image):
 # --- PHẦN 3: XÂY DỰNG GIAO DIỆN WEB ---
 
 st.set_page_config(layout="wide", page_title="Bot Nhận Dạng Ảnh")
-
 st.title("🤖 Bot Nhận Dạng Hình Ảnh")
 st.write("Tải lên một bức ảnh, và AI sẽ cho bạn biết nó nhìn thấy gì.")
 
